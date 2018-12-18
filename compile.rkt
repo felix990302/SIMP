@@ -4,40 +4,10 @@
 
 (provide compile-simp test1)
 
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (define fens-table (make-hash))
 (define params/vars-table (make-hash))
 (define temps (make-hash))
-(struct function (name params vars stmts) #:transparent)
-
-
-(define (preprocess fens)
-  (define acc empty)
-  (for ([fen fens])
-    (match fen
-    [`(fun (,name ,params ...) (vars [,vars ...] ,stmts ...))
-     (match (last stmts)
-       [`(return ,_)
-        (safe-put fens-table name (length params))
-        (assure-unique params vars)
-        (set! acc (cons (function name params vars stmts) acc))]
-       [x (error (format "no return statement: ~a!" x))])]
-    [x (error "invalid function: ~a" x)]))
-  (reverse acc))
- 
-
-(define (compile-simp instr)
-  (hash-clear! fens-table)
-  (set! label-num 0)
-  (define preprocessed (preprocess instr))
-  (reverse
-   (cons '(data stack 0)
-         (cons '(data fp stack)
-               (cons '(data sp stack) 
-                     (append
-                      (compile-fens preprocessed)
-                      '((halt))
-                      (feval 'main empty)))))))
-
 
 (define (safe-put table key val)
   (define res (hash-ref table key empty))
@@ -54,6 +24,39 @@
     ;(printf "params/vars: ~a\n" params/vars-table)
     ))
 
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(struct function (name params vars stmts) #:transparent)
+
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(define (preprocess fens)
+  (define acc empty)
+  (for ([fen fens])
+    (match fen
+    [`(fun (,name ,params ...) (vars [,vars ...] ,stmts ...))
+     (match (last stmts)
+       [`(return ,_)
+        (safe-put fens-table name (length params))
+        (assure-unique params vars)
+        (set! acc (cons (function name params vars stmts) acc))]
+       [x (error (format "no return statement: ~a!" x))])]
+    [x (error "invalid function: ~a" x)]))
+  (reverse acc))
+
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+(define (compile-simp instr)
+  (hash-clear! fens-table)
+  (set! label-num 0)
+  (define preprocessed (preprocess instr))
+  (reverse
+   (cons '(data stack 0)
+         (cons '(data fp stack)
+               (cons '(data sp stack) 
+                     (append
+                      (compile-fens preprocessed)
+                      '((halt))
+                      (feval 'main empty)))))))
+
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (define (compile-fens fens)
   (define acc empty)
   (for ([fen fens])
@@ -79,17 +82,7 @@
       (list (label (flabel name))))]
     [x (error (format "invalid function: ~a" x))]))
 
-
-
-(define (symbol-prepend str symb)
-  (string->symbol (string-append str (symbol->string symb))))
-(define (to-var symb)
-  (symbol-prepend "_" symb))
-;; symb -> val -> []
-;(define (data name vars)
-;  (list 'data (to-var name) vars))
-
-
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ;; [[]]->[[]]
 (define (compile-vars vars)
   (define acc empty)
@@ -101,14 +94,19 @@
       [x (error (format "invalid variable declaration: ~a\n" x))]))
   acc)
 
-
 (define (loc-of var)
   (define ind (hash-ref temps var))
   (if (false? ind) (error (format "undefined variable: ~a" var))
       (list ind 'fp)))
 
+(define (symbol-prepend str symb)
+  (string->symbol (string-append str (symbol->string symb))))
+(define (to-var symb)
+  (symbol-prepend "_" symb))
 
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (define label-num 0)
+
 (define (newlabel)
   (define num label-num)
   (set! label-num (add1 label-num))
@@ -118,14 +116,13 @@
 (define (label label-name)
   (list 'label label-name))
 
-
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ;; [[]] -> [[]]
 (define (compile-stmts stmts)
   (define acc empty)
   (for ([stmt stmts])
     (set! acc (append (compile-stmt stmt) acc)))
   acc)
-
 
 ;; [] -> [[]]
 (define (compile-stmt stmt)
@@ -183,17 +180,20 @@
                                                                (list (label LOOP-TOP)))))))))))]
     [x (error (format "invalid statement: ~a\n" x))]))
 
-
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (define (peek ind)
   (list ind 'sp))
+
 (define (inc steps)
   (list 'add 'sp 'sp steps))
+
 (define (push var/val)
   (list (inc 1) (list 'move '(0 sp) var/val)))
+
 (define (pop)
   '(sub sp sp 1))
 
-
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (define (aeval aexp) 
   ;(printf "--|called aeval on: ~a\n" aexp)
   (match aexp
@@ -210,7 +210,7 @@
     [`(,f ,args ...)(feval f args)]
     [x (error (format "invalid arithemetic expression: ~a\n" x))]))
 
-
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (define (feval f args)
   (define main? (equal? f 'main))
   (define res (hash-ref fens-table f empty))
@@ -235,8 +235,8 @@
   (for ([arg args])
     (set! acc (append (aeval arg) acc)))
   acc)
-     
 
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (define (beval bexp)
   ;(printf "~a--|called beval on: ~a\n" (incr order) bexp)
   (match bexp
@@ -284,6 +284,7 @@
                                                             (cons (list 'branch (peek -1) IF-TRUE)
                                                                   (beval bexp))))))))))))
 
+;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (define (aop? aop)
   (or
    (equal? aop '+)
