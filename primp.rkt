@@ -268,6 +268,5 @@
       (printf "M[~a]--|~a\n" i e)))
   (printf "--------------------------------------\n"))
 
-;(primp-assemble (compile-simp test1))
-(load-primp (primp-assemble (compile-simp test1)));
+(load-primp (primp-assemble (compile-simp (read))));
 (run-primp)
