@@ -32,23 +32,8 @@
 
 
 ;; wrapper for nested fetch
-;; assumes all variables have already been declared
-(define (fetch-psymb/val* name psymb/val)
-  (define res (fetch* psymb/val))
-  (cond
-    [(imm? psymb/val) psymb/val]
-    [(found? res)
-     (if (equal? (found-key res) name)
-         (error (format "circular: ~a" psymb/val))
-         (error (format "undefined: ~a" psymb/val)))]
-    [(equal? name res)
-     (error (format "circular: ~a" psymb/val))]
-    [else res]))
-
-
-;; wrapper for nested fetch
 ;; catches attempts for circular definition when run as variables are declared
-(define (pre-fetch-psymb/val* name psymb/val)
+(define (fetch-psymb/val* name psymb/val)
   (define res (fetch* psymb/val))
   (cond
     [(imm? psymb/val) psymb/val]
@@ -78,7 +63,7 @@
     (match line
       [`(const ,psymb ,psymb/val)
        ; checks for circular definitions
-       (safe-put psymb (const (pre-fetch-psymb/val* psymb psymb/val)))] 
+       (safe-put psymb (const (fetch-psymb/val* psymb psymb/val)))] 
       [`(label ,psymb)
        (safe-put psymb (label line-num))]
       [`(data ,psymb (,nat ,psymb/val))
