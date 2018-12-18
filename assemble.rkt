@@ -1,8 +1,8 @@
 #lang racket
 
-(require "compile.rkt")
 (provide primp-assemble)
 
+;; helper data structures
 (struct const (val) #:transparent)
 (struct label (loc) #:transparent)
 (struct data (loc) #:transparent)
@@ -149,11 +149,11 @@
     [`(,imm ,ind) (list (fetch-imm imm) (fetch-ind ind))]
     [`(,num) (if (number? num) (list num) (error (format "incorrect: ~a" num)))]
     [x (fetch-dest x)]))
+
 (define (fetch-dest dest)
   (match (safe-get dest)
     [(data loc) (list loc)]
     [x (error (format "incorrect: ~a" dest))]))
-
 
 (define (get-opd opd)
   (cond
@@ -163,6 +163,7 @@
        [`(,imm ,ind) (list (fetch-imm imm) (fetch-ind ind))]
        [`(,num) (if (number? num) (list num) (error (format "incorrect: ~a" num)))]
        [x (fetch-opd x)])]))
+
 (define (fetch-opd opd)
   (match (safe-get opd)
     [(const val) val]
@@ -183,7 +184,6 @@
        [(data loc) loc]
        [x (error (format "incorrect: ~a" imm))])]))
 
-
 (define (get-target opd)
   (cond
     [(imm? opd) opd]
@@ -192,6 +192,7 @@
        [`(,imm ,ind) (list (fetch-imm imm) (fetch-ind ind))]
        [`(,num) (if (number? num) (list num) (error (format "incorrect: ~a" num)))]
        [x (fetch-target x)])]))
+
 (define (fetch-target opd)      
   (match (safe-get opd)
     [(const val) (list val)]
@@ -240,7 +241,7 @@
   (finalize)
   (assemble preprocessed))
 
-;(primp-assemble (compile-primp test3))
+;;(primp-assemble (compile-primp test3))
 
 
 (define test
