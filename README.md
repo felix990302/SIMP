@@ -32,7 +32,7 @@ A SIMP function contains a sequence of statements, which are defined recursively
     
     bexp = (= | > | < | >= | <= aexp bexp)
     | (not bexp)
-| (and | or bexp ...)
+    | (and | or bexp ...)
     | true | false
 ```
 
@@ -49,5 +49,5 @@ I included an emulator for running PRIMP
 To actually run the compiler, assembler, and emulator, you need a distribution of Racket
 
 ```bash
-racket simp.rkt test1.simp .... simp source files to run
+racket simp.rkt test1.simp .... # simp source files to run
 ```
