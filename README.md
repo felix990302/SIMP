@@ -1,5 +1,5 @@
 # SIMP
-SIMP is a very small imperative language with Scheme-like syntax which compiles down to PRIMP code
+SIMP is a very small imperative language with Scheme-like syntax which compiles down to APRIMP code
 
 It has similar style to languages like C++ and Java in that source files are a sequence of functions.
 
@@ -37,6 +37,10 @@ A SIMP function contains a sequence of statements, which are defined recursively
 ```
 
 For a complete example of SIMP source code, see test1.simp
+
+# APRIMP
+
+APRIMP is a sudo assembly language which is assembled down to actual PRIMP
 
 # PRIMP
 
