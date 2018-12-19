@@ -2,7 +2,7 @@
 
 ;; Partnered with Jia Shi
 
-(provide compile-simp test1)
+(provide compile-simp)
 
 ;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 (define fens-table (make-hash))
