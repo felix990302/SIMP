@@ -1,6 +1,5 @@
 #lang racket
 
-(require "compile.rkt" "assemble.rkt")
 (provide load-primp run-primp)
 
 (define MEM-SIZE 10000)
@@ -267,6 +266,3 @@
     (unless (or (equal? e 'notused)(not (or (number? e)(boolean? e))))
       (printf "M[~a]--|~a\n" i e)))
   (printf "--------------------------------------\n"))
-
-(load-primp (primp-assemble (compile-simp (read))));
-(run-primp)
