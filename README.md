@@ -49,5 +49,10 @@ I included an emulator for running PRIMP
 To actually run the compiler, assembler, and emulator, you need a distribution of Racket
 
 ```bash
+racket compile.rkt filename.simp .... # simp source files to compile
+racket assemble.rkt filename.aprimp .... # aprimp files to assemble
+racket primp.rkt filename.primp .... # primp source files to run
+
+# or just run the entire process:
 racket simp.rkt test1.simp .... # simp source files to run
 ```
